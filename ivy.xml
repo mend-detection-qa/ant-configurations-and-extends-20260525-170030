@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ivy.xml — ant-configurations-and-extends probe.
+
+  Five configurations exercising configuration-mapping (#6) and
+  configuration-extends (#7):
+
+    compile   — base compile-time scope
+    runtime   — extends compile (sees compile deps + its own)
+    test      — extends runtime (sees compile + runtime + its own deps)
+    provided  — isolated scope (container provides at runtime, excluded from WAR)
+    master    — Ivy "master" configuration convention (artifact itself, no deps)
+
+  Extends chain:
+    test ──extends──> runtime ──extends──> compile
+
+  Dependency conf-mapping syntax variety exercised:
+    compile->default          (standard Maven-style mapping)
+    runtime->compile(*),master(*)   (multi-target with wildcard)
+    test->default             (simple default mapping)
+    provided->default         (provided scope, same syntax as compile)
+    *->@                      (identity mapping: use same-named configuration)
+
+  Expected visibility (Mode-1 Ivy resolution):
+    compile conf  : commons-lang3
+    runtime conf  : slf4j-api  +  everything in compile
+    test conf     : junit, hamcrest-core  +  everything in compile+runtime
+    provided conf : servlet-api  (isolated — NOT inherited by test/runtime)
+    master conf   : commons-io   (artifact only, no transitive deps)
+-->
+<ivy-module version="2.0">
+    <info organisation="mend-detection-qa"
+          module="ant-configurations-and-extends"
+          revision="1.0.0"
+          status="integration"/>
+
+    <configurations>
+        <conf name="compile"
+              description="Compile-time dependencies"/>
+        <conf name="runtime"
+              extends="compile"
+              description="Runtime dependencies; inherits compile"/>
+        <conf name="test"
+              extends="runtime"
+              description="Test dependencies; inherits runtime (and thus compile)"/>
+        <conf name="provided"
+              description="Provided by container at runtime; not transitive"/>
+        <conf name="master"
+              description="Ivy master conf: module artifact, no dependencies"/>
+    </configurations>
+
+    <dependencies>
+        <!--
+          compile scope: standard conf-mapping syntax
+          org.apache.commons:commons-lang3:3.12.0
+        -->
+        <dependency org="org.apache.commons"
+                    name="commons-lang3"
+                    rev="3.12.0"
+                    conf="compile->default"/>
+
+        <!--
+          runtime scope: multi-target conf-mapping with wildcard
+          org.slf4j:slf4j-api:1.7.36
+          conf="runtime->compile(*),master(*)" maps the runtime configuration
+          to both compile(*) and master(*) of slf4j-api (pulls all artifacts).
+        -->
+        <dependency org="org.slf4j"
+                    name="slf4j-api"
+                    rev="1.7.36"
+                    conf="runtime->compile(*),master(*)"/>
+
+        <!--
+          test scope: standard conf-mapping syntax
+          junit:junit:4.13.2 (also pulls hamcrest-core:1.3 transitively)
+        -->
+        <dependency org="junit"
+                    name="junit"
+                    rev="4.13.2"
+                    conf="test->default"/>
+
+        <!--
+          provided scope: isolated — not inherited by test/runtime/compile
+          javax.servlet:servlet-api:2.5
+        -->
+        <dependency org="javax.servlet"
+                    name="servlet-api"
+                    rev="2.5"
+                    conf="provided->default"/>
+
+        <!--
+          master scope: identity conf-mapping (*->@)
+          commons-io:commons-io:2.11.0 — master conf artifact only, no deps
+        -->
+        <dependency org="commons-io"
+                    name="commons-io"
+                    rev="2.11.0"
+                    conf="*->@"/>
+    </dependencies>
+</ivy-module>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  build.xml — ant-configurations-and-extends probe.
+
+  Single-module project. All five Ivy configurations (compile, runtime,
+  test, provided, master) are declared in ivy.xml with an extends chain:
+    test extends runtime extends compile.
+
+  The resolve target exercises all five configurations at once. The
+  retrieve target copies resolved JARs to lib/ (aspirational for Mode-1;
+  Mode-3 already has the JARs committed under lib/).
+
+  No compile or test execution targets — this probe tests dep detection only.
+-->
+<project name="ant-configurations-and-extends" default="resolve" basedir="."
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <property name="ivy.settings.file" value="${basedir}/ivysettings.xml"/>
+    <property name="lib.dir"           value="${basedir}/lib"/>
+
+    <taskdef resource="org/apache/ivy/ant/antlib.xml"
+             uri="antlib:org.apache.ivy.ant"
+             classpath="${ivy.jar.path}"/>
+
+    <target name="resolve" description="Resolve all Ivy configurations">
+        <ivy:settings file="${ivy.settings.file}"/>
+        <ivy:resolve file="${basedir}/ivy.xml"
+                     conf="compile,runtime,test,provided,master"
+                     failonerror="false"
+                     log="download-only"/>
+    </target>
+
+    <target name="retrieve" depends="resolve"
+            description="Retrieve resolved JARs into lib/">
+        <ivy:retrieve pattern="${lib.dir}/[artifact]-[revision].[ext]"
+                      conf="compile,runtime,test,provided,master"
+                      sync="false"/>
+    </target>
+
+    <target name="classpath-compile" depends="resolve"
+            description="Build compile-conf classpath">
+        <ivy:cachepath pathid="compile.classpath" conf="compile" failonerror="false"/>
+    </target>
+
+    <target name="classpath-test" depends="resolve"
+            description="Build test-conf classpath (inherits compile+runtime via extends)">
+        <ivy:cachepath pathid="test.classpath" conf="test" failonerror="false"/>
+    </target>
+
+</project>

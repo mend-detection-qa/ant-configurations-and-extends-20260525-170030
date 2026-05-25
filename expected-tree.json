@@ -1,0 +1,102 @@
+{
+  "_schema_version": "1.0",
+  "_probe_id": "ant-configurations-and-extends-20260525-170030",
+  "_pm": "ant",
+  "_pm_version_tested": "ivy-2.5.x",
+  "_scanner_mode": "mode-3-default-path-scan",
+  "_patterns": [
+    "configuration-mapping",
+    "configuration-extends"
+  ],
+  "_catalog_ids": ["#6", "#7"],
+  "_generated": "2026-05-25",
+
+  "_mode_3_notes": [
+    "The bolt-4 SCM scanner does NOT invoke Mode-1 Ivy resolution.",
+    "It falls through to Mode-3 default path scan: SHA1 fingerprints of binary files (jar/war/dll/etc).",
+    "Each lib/*.jar appears as a flat direct dependency with no transitive structure.",
+    "Configuration-mapping and configuration-extends semantics are exercised at lib-population time (we curated the 6 JARs).",
+    "The group field on each package records the Ivy configuration the JAR belongs to — compile/runtime/test/provided/master.",
+    "Mode-1 testing would require pipeline-mode `mend ua -c whitesource.config`, not SCM integration.",
+    "hamcrest-core-1.3.jar is junit's transitive dep; committed to lib/ so Mode-3 can fingerprint it."
+  ],
+
+  "schema_version": "1.0",
+  "pm": "ant",
+  "source_file": "build.xml",
+  "root": {
+    "name": "ant-configurations-and-extends-20260525",
+    "version": "1.0.0",
+    "dependencies": [
+      "commons-lang3-3.12.0.jar",
+      "slf4j-api-1.7.36.jar",
+      "junit-4.13.2.jar",
+      "hamcrest-core-1.3.jar",
+      "servlet-api-2.5.jar",
+      "commons-io-2.11.0.jar"
+    ]
+  },
+  "packages": {
+    "commons-lang3-3.12.0.jar": {
+      "version": "3.12.0",
+      "source": "local",
+      "source_detail": {"path": "lib/commons-lang3-3.12.0.jar"},
+      "group": "compile",
+      "hashes": ["c6842c86792ff03b9f1d1fe2aab8dc23aa6c6f0e"],
+      "dependencies": []
+    },
+    "slf4j-api-1.7.36.jar": {
+      "version": "1.7.36",
+      "source": "local",
+      "source_detail": {"path": "lib/slf4j-api-1.7.36.jar"},
+      "group": "runtime",
+      "hashes": ["6c62681a2f655b49963a5983b8b0950a6120ae14"],
+      "dependencies": []
+    },
+    "junit-4.13.2.jar": {
+      "version": "4.13.2",
+      "source": "local",
+      "source_detail": {"path": "lib/junit-4.13.2.jar"},
+      "group": "test",
+      "hashes": ["8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12"],
+      "dependencies": []
+    },
+    "hamcrest-core-1.3.jar": {
+      "version": "1.3",
+      "source": "local",
+      "source_detail": {"path": "lib/hamcrest-core-1.3.jar"},
+      "group": "test",
+      "hashes": ["42a25dc3219429f0e5d060061f71acb49bf010a0"],
+      "dependencies": []
+    },
+    "servlet-api-2.5.jar": {
+      "version": "2.5",
+      "source": "local",
+      "source_detail": {"path": "lib/servlet-api-2.5.jar"},
+      "group": "provided",
+      "hashes": ["5959582d97d8b61f4d154ca9e495aafd16726e34"],
+      "dependencies": []
+    },
+    "commons-io-2.11.0.jar": {
+      "version": "2.11.0",
+      "source": "local",
+      "source_detail": {"path": "lib/commons-io-2.11.0.jar"},
+      "group": "master",
+      "hashes": ["a2503f302b11ebde7ebc3df41daebe0e4eea3689"],
+      "dependencies": []
+    }
+  },
+  "project_metadata": {
+    "groups": ["compile", "runtime", "test", "provided", "master"],
+    "extends_chain": "test -> runtime -> compile"
+  },
+  "warnings": [
+    "Probe pivoted from Mode-1 (Ivy resolution) to Mode-3 (binary path scan) because the bolt-4 SCM scanner does not honor ant.ivyResolveDependencies=true from repo-root whitesource.config.",
+    "JARs were pre-resolved from Maven Central and committed to lib/ to give Mode-3 something to fingerprint.",
+    "Configuration-mapping (#6): five distinct conf-mapping syntaxes appear in ivy.xml — compile->default, runtime->compile(*),master(*), test->default, provided->default, *->@.",
+    "Configuration-extends (#7): test extends runtime extends compile; Mode-3 flattens the hierarchy — all 6 JARs appear as direct deps with no inherited relationship visible.",
+    "hamcrest-core-1.3.jar is junit's transitive dep (pulled in by junit:4.13.2 via POM dep on hamcrest-core:1.3). Committed to lib/ so Mode-3 fingerprints it.",
+    "servlet-api:2.5 (provided scope) is isolated: NOT inherited by test/runtime/compile. In Mode-1 it would not appear on the runtime classpath. In Mode-3 it appears as a flat direct dep alongside the rest.",
+    "commons-io:2.11.0 uses *->@ (identity mapping) on the master conf: only the artifact itself, no transitive deps. Both behaviors are indistinguishable in Mode-3."
+  ]
+}

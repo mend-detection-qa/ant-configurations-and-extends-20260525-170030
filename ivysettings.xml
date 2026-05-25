@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ivysettings.xml — ant-configurations-and-extends probe.
+
+  Minimal settings: single Maven Central chain resolver with no conflict-manager
+  overrides. The purpose of this probe is to exercise configuration-mapping (#6)
+  and configuration-extends (#7), not conflict management (covered by Project #1).
+
+  The defaultConflictManager is left as "latest-revision" (Ivy default) so that
+  junit's transitive dep on hamcrest-core:1.3 resolves cleanly.
+-->
+<ivysettings>
+    <settings defaultResolver="central"/>
+
+    <resolvers>
+        <chain name="central" returnFirst="true">
+            <ibiblio name="maven-central"
+                     m2compatible="true"
+                     root="https://repo1.maven.org/maven2/"/>
+        </chain>
+    </resolvers>
+</ivysettings>
